@@ -28,7 +28,8 @@ Yük önceliklendirme yapısı, kritik ve yarı kritik yüklerin her koşulda ke
 │   └── scenario2.gms
 │
 ├── data/              # Girdi veri setleri
-│
+│   └── README_DATA.md
+│   
 ├── results/           # Model çıktıları
 │   ├── scenario1_results.csv
 │   ├── scenario2_results.csv
@@ -36,12 +37,9 @@ Yük önceliklendirme yapısı, kritik ve yarı kritik yüklerin her koşulda ke
 │       ├── s1_plot_*.png  # 7 grafik (Senaryo 1)
 │       └── s2_plot_*.png  # 7 grafik (Senaryo 2)
 │
-├── docs/              # Ek dokümantasyon
-│   └── PROJECT_OVERVIEW.md
-│
 ├── requirements.txt   # Görselleştirmeler için Python bağımlılıkları
-└── README.md
-
+└── README_EN.md
+└── README_TR.md
 ```
 
 ---
