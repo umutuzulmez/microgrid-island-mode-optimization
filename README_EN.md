@@ -160,20 +160,3 @@ For questions or collaboration:
 * Email or LinkedIn contact can be added here.
 
 This repository is designed for academic, research, and engineering portfolio use, providing a comprehensive example of microgrid optimization implemented with GAMS and MILP.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
----
-```
