@@ -113,12 +113,12 @@ Her iki senaryoda da grafik adlandırma yapısı birebir aynıdır; bu sayede ka
 
 ### Her senaryoda yer alan grafikler:
 
-1. Batarya Güç Profili
-2. Emisyon Göstergeleri
-3. Enerji Akış Diyagramı
+1. Batarya Güç Akışı
+2. Karbon Emisyonu
+3. Sistem Enerji Akışı ve Kaynak Katkısı
 4. Yenilenebilir Enerji Kullanımı
-5. Yük Dağılımı (kritik / yarı kritik / esnek)
-6. SOC (State of Charge) Profili
+5. Konut Yükü Kaynak Dağılımı
+6. Batarya Doluluk Oranı (SOC)
 7. Toplam İşletme Maliyeti
 
 ---
