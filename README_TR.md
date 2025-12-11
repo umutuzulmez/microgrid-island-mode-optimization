@@ -81,8 +81,6 @@ Minimizasyon kapsamı:
 * **SOC limitleri:** 20% ≤ SOC ≤ 90%
 * **Yük önceliği:** kritik ve yarı kritik yükler tam olarak karşılanmak zorundadır
 
-Ayrıntılı açıklamalar **docs/PROJECT_OVERVIEW.md** dosyasında sunulmuştur.
-
 ---
 
 ## 5. Sonuçlar

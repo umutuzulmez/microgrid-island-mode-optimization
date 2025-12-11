@@ -80,8 +80,6 @@ Minimize:
 * **SOC boundaries:** 20% ≤ SOC ≤ 90%
 * **Load priority:** critical and semi-critical loads must be fully satisfied
 
-A full description is available in **docs/PROJECT_OVERVIEW.md**.
-
 ---
 
 ## 5. Results
