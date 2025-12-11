@@ -113,13 +113,13 @@ Plot names follow the same structure for both scenarios, enabling one-to-one com
 
 ### Included charts (for each scenario):
 
-1. Battery Power Profile
-2. Emission Indicators
-3. Energy Flow Overview
-4. Renewable Usage Profile
-5. Residential Load Contribution (Served Load Breakdown)
-6. State of Charge (SOC) Profile
-7. Total Operational Cost
+1. Battery Power Flow
+2. Carbon Emissions
+3. System Energy Flow and Source Contribution
+4. Renewable Energy Utilization
+5. Residential Load Contribution
+6. Battery State of Charge (SOC)
+7. Total Operating Cost
 
 ---
 
