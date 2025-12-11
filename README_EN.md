@@ -28,6 +28,7 @@ Load prioritization ensures uninterrupted supply to critical and semi-critical l
 │   └── scenario2.gms
 │
 ├── data/              # Input datasets
+│   └── README_DATA.md
 │
 ├── results/           # Model outputs
 │   ├── scenario1_results.csv
@@ -36,11 +37,9 @@ Load prioritization ensures uninterrupted supply to critical and semi-critical l
 │       ├── s1_plot_*.png  # 7 plots (Scenario 1)
 │       └── s2_plot_*.png  # 7 plots (Scenario 2)
 │
-├── docs/              # Supplementary documentation
-│   └── PROJECT_OVERVIEW.md
-│
 ├── requirements.txt   # Python dependencies for visualizations
-└── README.md
+└── README_EN.md
+└── README_TR.md
 ```
 
 ---
