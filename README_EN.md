@@ -89,11 +89,6 @@ Since all load groups are fully served by definition, the model does not include
 
 The CSV files generated for each scenario contain the following hourly variables:
 
-* **scenario1_results.csv**
-* **scenario2_results.csv**
-
-Each file contains the following hourly variables:
-
 * PV generation
 * WT generation
 * DG output and operating state
