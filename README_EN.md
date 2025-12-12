@@ -1,43 +1,45 @@
-# Microgrid Island Mode Optimization (GAMS – MILP)
+# Microgrid Optimization in Island Mode (GAMS – MILP)
 
-This repository presents a fully developed Mixed-Integer Linear Programming (MILP) optimization model for an island-mode microgrid. The model is implemented in **GAMS** using the **CPLEX** solver and includes complete datasets, scenario-based results, and visualization outputs.
+This project presents a 24-hour operational planning model for an islanded microgrid formulated as a **Mixed-Integer Linear Programming (MILP)** problem. The optimization framework is implemented in GAMS using the CPLEX solver, and all scenario outputs and visualization scripts are included in the repository.
 
-The project aims to provide a transparent, reproducible, and engineering‑oriented framework for microgrid operations, covering renewable generation, diesel dispatch, and BESS energy management.
+The model jointly evaluates photovoltaic (PV) generation, wind turbine (WT) generation, a diesel generator (DG), and a battery energy storage system (BESS). Critical, semi-critical, and flexible load groups are represented through separate demand profiles, all enforced through full-service constraints.
 
 ---
 
-## 1. Microgrid Architecture
+## 1. System Description
 
-The modeled microgrid operates entirely in island mode over a 24‑hour horizon and includes the following components:
-
+The microgrid model consists of the following components:
 * **Photovoltaic (PV) generation**
 * **Wind turbine (WT) generation**
-* **Diesel generator (DG)** with on/off decision variables
+* **Diesel generator (DG)** with a binary on/off status and minimum load requirement
 * **Battery Energy Storage System (BESS)**
 * **Critical, semi-critical, and flexible loads**
 
-Load prioritization ensures uninterrupted supply to critical and semi-critical loads under all operational conditions.
+All resources and loads are evaluated on an hourly basis.
 
 ---
 
-## 2. Project Structure
+## 2. Repository Structure
 
 ```
-├── gams/              # GAMS optimization models
+├── gams/              
 │   ├── scenario1.gms
 │   └── scenario2.gms
 │
-├── data/              # Input datasets
+├── data/              
 │   └── README_DATA.md
 │
-├── results/           # Model outputs
+├── results/           
 │   ├── scenario1_results.csv
 │   ├── scenario2_results.csv
 │   └── plots/
-│       ├── s1_plot_*.png  # 7 plots (Scenario 1)
-│       └── s2_plot_*.png  # 7 plots (Scenario 2)
+│       ├── s1_plot_*.png  
+│       └── s2_plot_*.png  
 │
-├── requirements.txt   # Python dependencies for visualizations
+├── scripts/
+│   └── generate_plots.py
+│
+├── requirements.txt   
 └── README_EN.md
 └── README_TR.md
 ```
@@ -46,44 +48,46 @@ Load prioritization ensures uninterrupted supply to critical and semi-critical l
 
 ## 3. Scenarios
 
-### **Scenario 1 – Deterministic Baseline**
+### **Scenario 1 – Deterministic case**
 
-A reference scenario using fixed generation and load profiles.
+PV and WT generation limits are defined using fixed capacity profiles.
 
-### **Scenario 2 – Real Meteorological Data**
+### **Scenario 2 – Real meteorological data**
 
-Uses actual solar and wind datasets to reflect realistic renewable variability.
+PV and WT capacity limits are derived from real solar irradiance and wind speed measurements.
 
-Both scenarios maintain identical model structure and constraints, enabling direct comparison.
+Both scenarios share the same structure, decision variables, constraints, and objective function. Although the data sources differ, the scenarios remain directly comparable in terms of operational behavior and constraint effects.
 
 ---
 
-## 4. MILP Optimization Model
-
-The optimization problem minimizes the total operating cost of the microgrid subject to operational and physical constraints.
+## 4. Optimization Model
 
 ### **Objective Function**
 
-Minimize:
+The objective is to minimize total operating cost, which includes:
 
+* PV generation cost
+* WT generation cost
+* BESS charging and discharging cost
 * Diesel generator fuel cost
-* Start/stop cost
-* Unserved flexible load penalties (if applicable)
 
-### **Key Constraints**
+Since all load groups are fully served by definition, the model does not include load-shedding penalties.
 
-* **Energy balance:** supply = demand for each hour
-* **Renewable limits:** PV/WT generation upper bounds
-* **DG operation:** binary on/off status, output bounds, startup constraints
-* **BESS model:** charge/discharge power limits, charge efficiency, discharge efficiency
-* **SOC boundaries:** 20% ≤ SOC ≤ 90%
-* **Load priority:** critical and semi-critical loads must be fully satisfied
+### **Main Constraints**
+
+* Hourly energy balance
+* PV and WT capacity limits
+* DG maximum and minimum power constraints
+* Binary DG operating status
+* BESS charge and discharge limits
+* SOC bounds (20% – 90%)
+* Full service of critical, semi-critical, and flexible loads
 
 ---
 
-## 5. Results
+## 5. Outputs
 
-The main outputs for each scenario are provided as:
+The CSV files generated for each scenario contain the following hourly variables:
 
 * **scenario1_results.csv**
 * **scenario2_results.csv**
@@ -92,34 +96,28 @@ Each file contains the following hourly variables:
 
 * PV generation
 * WT generation
-* DG power output
-* BESS charging/discharging
-* SOC (State of Charge)
-* Served load (critical, semi-critical, flexible)
-* Total supply and unmet load
+* DG output and operating state
+* BESS charging and discharging
+* SOC profile
+* Served critical, semi-critical, and flexible loads
+* Total supply distribution
+* DG-based carbon emissions
 
 These CSV files are directly connected to the generated plots.
 
 ---
 
-## 6. Visualizations (14 Plots)
+## 6. Visualizations
 
-The **plots/** directory contains 14 charts:
+Each scenario includes seven plots, resulting in a total of fourteen figures:
 
-* **7 for Scenario 1**
-* **7 for Scenario 2**
-
-Plot names follow the same structure for both scenarios, enabling one-to-one comparison.
-
-### Included charts (for each scenario):
-
-1. Battery Power Flow
-2. Carbon Emissions
-3. System Energy Flow and Source Contribution
-4. Renewable Energy Utilization
-5. Residential Load Contribution
-6. Battery State of Charge (SOC)
-7. Total Operating Cost
+1. Battery power flow
+2. Carbon emissions
+3. Energy flow and source contribution
+4. Renewable generation profile
+5. Load distribution
+6. SOC profile
+7. Total operating cost
 
 ---
 
@@ -127,21 +125,18 @@ Plot names follow the same structure for both scenarios, enabling one-to-one com
 
 ### **Requirements**
 
-* GAMS + CPLEX Solver
-* Python (for visualizations)
+* GAMS + CPLEX
+* Python
 
 ### **Steps**
 
-1. Open GAMS.
-2. Load `scenario1.gms` or `scenario2.gms`.
-3. Run with **F9**.
-4. CSV outputs will be generated automatically in the **results/** directory.
-5. To regenerate plots:
-
+1. Run either `scenario1.gms` or `scenario2.gms` in GAMS.
+2. The outputs will be stored automatically in the `results/` directory.
+3. To generate the plots:
 ```
 pip install -r requirements.txt
+python scripts/generate_plots.py
 ```
-
 ---
 
 ## 8. License
@@ -152,8 +147,4 @@ This project is distributed under the **MIT License**.
 
 ## 9. Contact
 
-For questions or collaboration:
-
-* Email or LinkedIn contact can be added here.
-
-This repository is designed for academic, research, and engineering portfolio use, providing a comprehensive example of microgrid optimization implemented with GAMS and MILP.
+For technical discussion, collaboration, or project inquiries, feel free to get in touch.
