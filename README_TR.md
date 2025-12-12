@@ -1,43 +1,46 @@
-# Ada Modunda Mikro şebeke Optimizasyonu (GAMS – MILP)
+# Ada Modunda Mikroşebeke Optimizasyonu (GAMS – MILP)
 
-Bu depo, ada modunda çalışan bir mikro şebeke için geliştirilmiş tam kapsamlı bir Karma-Tamsayılı Doğrusal Programlama (MILP) optimizasyon modelini içermektedir. Model GAMS ortamında CPLEX çözücüsü kullanılarak uygulanmış olup, tüm veri kümeleri, senaryo temelli sonuçlar ve görselleştirme çıktıları projeye dahildir.
+Bu çalışma, ada modunda işletilen bir mikroşebekenin 24 saatlik operasyon planlamasının **Karma-Tamsayılı Doğrusal Programlama (MILP)** yöntemiyle modellenmesini içermektedir. Optimizasyon modeli GAMS ortamında CPLEX çözücüsü kullanılarak geliştirilmiştir. Her iki senaryonun sonuçları, Python ile üretilen grafiklerle birlikte depoda sunulmaktadır.
 
-Bu çalışma, yenilenebilir üretim, dizel jeneratör planlaması ve BESS enerji yönetimi dâhil olmak üzere mikro şebeke işletiminin şeffaf, tekrarlanabilir ve mühendislik odaklı bir çerçevede incelenmesini amaçlamaktadır.
+Modelde fotovoltaik üretim, rüzgâr türbini, dizel jeneratör ve batarya enerji depolama sistemi birlikte değerlendirilmiştir. Kritik, yarı kritik ve esnek yükler için ayrı besleme seviyeleri tanımlanmış olup, her üç yük grubu modelde **tam hizmet kısıtı** ile temsil edilmiştir.
 
 ---
 
-## 1. Mikroşebeke Mimarisi
+## 1. Sistem Yapısı
 
-Model, 24 saatlik bir zaman diliminde tamamen ada modunda çalışan bir mikro şebekeyi kapsamaktadır ve şu bileşenlerden oluşur:
+Modelde kullanılan bileşenler:
 
 * **Fotovoltaik (PV) üretim**
 * **Rüzgâr türbini (WT) üretim**
-* **Dizel jeneratör (DG)** aç/kapa karar değişkenleri ile
+* **Dizel jeneratör (DG)** ikili aç/kapa durumu ve minimum üretim sınırı
 * **Batarya Enerji Depolama Sistemi (BESS)**
-* **Kritik, yarı kritik ve esnek yükler**
+* **Kritik, yarı kritik ve esnek yük grupları**
 
-Yük önceliklendirme yapısı, kritik ve yarı kritik yüklerin her koşulda kesintisiz beslenmesini garanti eder.
+Tüm üretim, depolama ve yük akışları saatlik çözünürlükte ele alınmıştır.
 
 ---
 
-## 2. Proje Yapısı
+## 2. Depo Yapısı
 
 ```
-├── gams/              # GAMS optimizasyon modelleri
+├── gams/              
 │   ├── scenario1.gms
 │   └── scenario2.gms
 │
-├── data/              # Girdi veri setleri
+├── data/              
 │   └── README_DATA.md
 │   
-├── results/           # Model çıktıları
+├── results/           
 │   ├── scenario1_results.csv
 │   ├── scenario2_results.csv
 │   └── plots/
-│       ├── s1_plot_*.png  # 7 grafik (Senaryo 1)
-│       └── s2_plot_*.png  # 7 grafik (Senaryo 2)
+│       ├── s1_plot_*.png 
+│       └── s2_plot_*.png  
 │
-├── requirements.txt   # Görselleştirmeler için Python bağımlılıkları
+├── scripts/
+│   └── generate_plots.py
+│
+├── requirements.txt  
 └── README_EN.md
 └── README_TR.md
 ```
@@ -46,80 +49,71 @@ Yük önceliklendirme yapısı, kritik ve yarı kritik yüklerin her koşulda ke
 
 ## 3. Senaryolar
 
-### **Senaryo 1 – Deterministik Temel Durum**
+### **Senaryo 1 – Deterministik durum**
 
-Sabit üretim ve yük profillerinin kullanıldığı referans senaryodur.
+PV ve WT kapasite değerleri sabit üretim profilleri üzerinden tanımlanmıştır.
 
 ### **Senaryo 2 – Gerçek Meteorolojik Veri**
 
-Güneş radyasyonu ve rüzgâr hızına ilişkin gerçek veri setleri kullanılarak yenilenebilir belirsizliğinin yansıtıldığı senaryodur.
+PV ve WT kapasite limitleri, gerçek güneş radyasyonu ve rüzgâr hızı verileri üzerinden hesaplanmıştır.
 
-Her iki senaryo da aynı model yapısını ve kısıtları korur; böylece doğrudan karşılaştırma mümkündür.
+Her iki senaryoda aynı karar değişkenleri, kısıtlar ve amaç fonksiyonu kullanılmaktadır. Veri kaynakları farklı olduğu için mutlak üretim seviyeleri değişmekle birlikte, operasyonel davranış ve kısıt etkileri açısından sonuçlar doğrudan karşılaştırılabilir niteliktedir.
 
 ---
 
-## 4. MILP Optimizasyon Modeli
-
-Optimizasyon problemi, mikro şebekenin toplam işletme maliyetini minimize eder ve fiziksel/operasyonel kısıtlar altında çözülür.
+## 4. Optimizasyon Modeli
 
 ### **Amaç Fonksiyonu**
 
-Minimizasyon kapsamı:
+Toplam işletme maliyetini en aza indirmek. Modele dahil edilen maliyetler:
 
-* Dizel jeneratör yakıt maliyeti
-* Başlatma/durdurma maliyetleri
-* (Varsa) karşılanamayan esnek yük cezaları
+* PV üretim maliyeti
+* WT üretim maliyeti
+* Batarya şarj/deşarj maliyeti
+* DG yakıt maliyeti
+
+Modelde yük kesilmediği için kesinti maliyeti bulunmamaktadır.
 
 ### **Temel Kısıtlar**
 
-* **Enerji dengesi:** Her saat için arz = talep
-* **Yenilenebilir sınırları:** PV/WT üst limitleri
-* **DG operasyonu:** ikili aç/kapa kararı, güç sınırları, başlatma koşulları
-* **BESS modeli:** şarj/deşarj sınırları, şarj verimi, deşarj verimi
-* **SOC limitleri:** 20% ≤ SOC ≤ 90%
-* **Yük önceliği:** kritik ve yarı kritik yükler tam olarak karşılanmak zorundadır
+* Saatlik enerji dengesi
+* PV ve WT kapasite sınırları
+* DG maksimum/minimum güç sınırları
+* DG ikili durum değişkeni
+* BESS şarj/deşarj limitleri
+* SOC aralığı (%20 – %90)
+* Kritik, yarı kritik ve esnek yüklerin tam karşılanması
 
 ---
 
-## 5. Sonuçlar
+## 5. Çıktılar
 
-Her senaryo için ana çıktılar aşağıdaki CSV dosyalarında sunulur:
-
-* **scenario1_results.csv**
-* **scenario2_results.csv**
-
-Bu dosyalar saatlik olarak şu değişkenleri içerir:
+Her senaryoya ait CSV dosyalarında şu değişkenler yer almaktadır:
 
 * PV üretimi
 * WT üretimi
-* DG güç çıktısı
+* DG çıktısı ve çalışma durumu
 * BESS şarj/deşarj değerleri
-* SOC (State of Charge)
-* Karşılanan yük (kritik, yarı kritik, esnek)
-* Toplam arz ve karşılanamayan yük
+* SOC profili
+* Kritik, yarı kritik ve esnek yüklerin karşılanma durumu
+* Toplam arz ve enerji bileşenlerinin dağılımı
+* DG kaynaklı karbon emisyonu
 
-Bu veriler, ilgili grafiklerin oluşturulmasında doğrudan kullanılmıştır.
+Bu değerler grafiklerde doğrudan kullanılmaktadır.
 
 ---
 
-## 6. Görselleştirmeler (14 Grafik)
+## 6. Grafikler
 
-**plots/** dizininde toplam 14 grafik bulunmaktadır:
+Her senaryoda 7 adet olmak üzere toplam 14 grafik bulunmaktadır:
 
-* **7 adet – Senaryo 1**
-* **7 adet – Senaryo 2**
-
-Her iki senaryoda da grafik adlandırma yapısı birebir aynıdır; bu sayede karşılıklı inceleme kolaylaşır.
-
-### Her senaryoda yer alan grafikler:
-
-1. Batarya Güç Akışı
-2. Karbon Emisyonu
-3. Sistem Enerji Akışı ve Kaynak Katkısı
-4. Yenilenebilir Enerji Kullanımı
-5. Konut Yükü Kaynak Dağılımı
-6. Batarya Doluluk Oranı (SOC)
-7. Toplam İşletme Maliyeti
+ 1. Batarya güç akışı
+ 2. Karbon emisyonu
+ 3. Enerji akışı ve kaynak dağılımı
+ 4. Yenilenebilir üretim profili
+ 5. Yük dağılımı
+ 6. SOC profili
+ 7. Toplam işletme maliyeti
 
 ---
 
@@ -127,33 +121,28 @@ Her iki senaryoda da grafik adlandırma yapısı birebir aynıdır; bu sayede ka
 
 ### **Gereksinimler**
 
-* GAMS + CPLEX Çözücüsü
-* Python (görseller için)
+* GAMS + CPLEX
+* Python 
 
 ### **Adımlar**
 
-1. GAMS’i açın.
-2. `scenario1.gms` veya `scenario2.gms` dosyasını yükleyin.
-3. **F9** ile çalıştırın.
-4. Çıktılar otomatik olarak **results/** klasörüne yazılır.
-5. Grafiklerin yeniden oluşturulması için:
-
+1. İlgili senaryoyu çalıştırın:
+`scenario1.gms` veya `scenario2.gms`
+2. Çıktılar `results/` dizinine kaydedilir.
+3. Grafik üretimi için:
 ```
 pip install -r requirements.txt
+python scripts/generate_plots.py
 ```
 
 ---
 
 ## 8. Lisans
 
-Bu proje **MIT Lisansı** altında dağıtılmaktadır.
+Proje **MIT Lisansı** ile paylaşılmaktadır.
 
 ---
 
 ## 9. İletişim
 
-Her türlü soru veya iş birliği için:
-
-* E-posta veya LinkedIn bilgisi burada belirtilebilir.
-
-Bu çalışma, GAMS ve MILP tabanlı mikro şebeke optimizasyonuna yönelik akademik, araştırma ve mühendislik portföyü kullanımına uygun, kapsamlı bir örnek uygulama sunmaktadır.
+Teknik değerlendirme, danışmanlık ve iş birliği talepleri için iletişime geçebilirsiniz.
